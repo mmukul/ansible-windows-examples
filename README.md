@@ -2,8 +2,8 @@
 
 ### Run commands on windows host
 
-$ ansible win -m win_ping
+$ ansible win -m win_ping --ask-pass
 
-$ ansible win -m setup
+$ ansible win -m setup --ask-pass
 
-$ ansible win -m win_whoami
+$ ansible win -m win_whoami --ask-pass
