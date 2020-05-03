@@ -9,4 +9,9 @@
          - git
          - firefox
          - notepadplusplus
+        pinned: no
         state: absent
+      register: pack
+
+    - debug:
+        var: pack

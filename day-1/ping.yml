@@ -6,3 +6,7 @@
   tasks:
   - name: ping
     win_ping:
+    register: output
+
+  - debug:
+       var: output

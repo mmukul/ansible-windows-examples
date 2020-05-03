@@ -9,4 +9,5 @@
          - firefox
          - git
          - notepadplusplus
+        pinned: yes
         state: present
