@@ -1,0 +1,14 @@
+---
+- hosts: win
+  gather_facts: false
+  tasks:
+
+    - name: Touch a file (creates if not present, updates modification time if present)
+      win_file:
+        path: C:\Temp\example.conf
+        state: touch
+
+    - name: Copy file to C:\User\sakthi
+      win_copy:
+        src: C:\Temp\example.conf
+        dest: C:\User\sakthi
