@@ -1,4 +1,4 @@
-## Ansible Windows Demo Examples
+## Ansible Windows Training Examples
 
 ### Run commands on windows host
 
