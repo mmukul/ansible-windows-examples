@@ -1,0 +1,17 @@
+---
+- hosts: win
+  gather_facts: false
+  tasks:
+    - name: Gather facts from chocolatey
+      win_chocolatey_facts:
+      register: choco
+
+# first method
+    - name: Displays facts from chocolatey
+      debug:
+        var: choco
+
+# second method
+    - name: Displays packages installed from chocolatey
+      debug:
+        var: ansible_chocolatey.packages
