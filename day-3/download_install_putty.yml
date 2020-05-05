@@ -1,0 +1,17 @@
+---
+- hosts: win
+  gather_facts: false
+  tasks:
+
+    - name: Download Putty
+      win_get_url:
+        url: https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.73-installer.msi
+        dest: C:\Users\sakthi\Downloads
+
+    - name: Install Putty
+      win_shell: C:\Users\sakthi\Downloads\putty-64bit-0.73-installer.msi
+      register: result
+
+    - name: Install Output
+      debug:
+        var: result
