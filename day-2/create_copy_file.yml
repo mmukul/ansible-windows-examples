@@ -11,4 +11,5 @@
     - name: Copy file to C:\User\sakthi
       win_copy:
         src: C:\Temp\example.conf
-        dest: C:\User\sakthi
+        dest: C:\Users\sakthi\example.conf
+        remote_src: yes
