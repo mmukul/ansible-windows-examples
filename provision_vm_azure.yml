@@ -20,6 +20,9 @@
       prompt: "Enter local administrator password"
       private: no
 
+    - name: subnet
+      prompt: "Enter the subnet name"
+      private: no
 
   tasks:
     - name: Create resource group
@@ -30,17 +33,24 @@
     - name: Create virtual network
       azure_rm_virtualnetwork:
         resource_group: "{{ resourcegroup }}"
-        name: Sakthi-vnet
+        name: vnet-ansible
         address_prefixes_cidr:
            - "10.2.0.0/16"
 
-    - name: Add subnet
+    - name: Add subnet1
       azure_rm_subnet:
         resource_group: "{{ resourcegroup }}"
-        name: subnet01
-        address_prefix_cidr:
-           - "10.2.0.0/24"
-        virtual_network_name: Sakthi-vnet
+        name: subnet2
+        address_prefix_cidr: "10.2.1.0/24"
+        virtual_network_name: vnet-ansible
+        state: present
+
+    - name: Add subnet2
+      azure_rm_subnet:
+        resource_group: "{{ resourcegroup }}"
+        name: subnet3
+        address_prefix_cidr: "10.2.2.0/24"
+        virtual_network_name: vnet-ansible
         state: present
 
     - name: Create public IP address
@@ -53,7 +63,7 @@
 
     - name: Show Public IP address
       debug:
-        msg: "The public IP is {{ output_ip_address.ip_address }}"
+        msg: "The public IP is {{ output_ip_address.state.ip_address }}"
 
     - name: Create Network Security Group
       azure_rm_securitygroup:
@@ -87,8 +97,8 @@
       azure_rm_networkinterface:
         name: "{{ virtualmachine }}NIC"
         resource_group: "{{ resourcegroup }}"
-        virtual_network: Sakthi-vnet
-        subnet_name: subnet01
+        virtual_network: vnet-ansible
+        subnet_name: "{{ subnet }}"
         security_group: "{{ virtualmachine }}NSG"
         state: present
         ip_configurations:
@@ -107,10 +117,9 @@
          admin_password: "{{ password }}"
          network_interfaces: "{{ virtualmachine }}NIC"
          os_type: Windows
-         subnet_name: subnet01
+         subnet_name: "{{ subnet }}"
          image:
            offer: WindowsServer
            publisher: MicrosoftWindowsServer
            sku: 2016-Datacenter
            version: latest
-        
