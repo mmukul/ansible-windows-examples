@@ -1,0 +1,116 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars_prompt:
+
+    - name: resourcegroup
+      prompt: "Enter the resource group name"
+      private: no
+
+    - name: location
+      prompt: "Enter location"
+      private: no
+
+    - name: virtualmachine
+      prompt: "Enter the virtual machine name"
+      private: no
+
+    - name: password
+      prompt: "Enter local administrator password"
+      private: no
+
+
+  tasks:
+    - name: Create resource group
+      azure_rm_resourcegroup:
+        name: "{{ resourcegroup }}"
+        location: "{{ location }}"
+
+    - name: Create virtual network
+      azure_rm_virtualnetwork:
+        resource_group: "{{ resourcegroup }}"
+        name: Sakthi-vnet
+        address_prefixes_cidr:
+           - "10.2.0.0/16"
+
+    - name: Add subnet
+      azure_rm_subnet:
+        resource_group: "{{ resourcegroup }}"
+        name: subnet01
+        address_prefix_cidr:
+           - "10.2.0.0/24"
+        virtual_network_name: Sakthi-vnet
+        state: present
+
+    - name: Create public IP address
+      azure_rm_publicipaddress:
+        resource_group: "{{ resourcegroup }}"
+        allocation_method: Static
+        name: "{{ virtualmachine }}PIP"
+        state: present
+      register: output_ip_address
+
+    - name: Show Public IP address
+      debug:
+        msg: "The public IP is {{ output_ip_address.ip_address }}"
+
+    - name: Create Network Security Group
+      azure_rm_securitygroup:
+        resource_group: "{{ resourcegroup }}"
+        name: "{{ virtualmachine }}NSG"
+        rules:
+          - name: 'allow_rdp'
+            protocol: Tcp
+            destination_port_range: 3389
+            access: Allow
+            priority: 1001
+            direction: Inbound
+          - name: 'allow_web_traffic'
+            protocol: Tcp
+            destination_port_range:
+              - 80
+              - 443
+            access: Allow
+            priority: 1002
+            direction: Inbound
+          - name: 'allow_powershell_remoting'
+            protocol: Tcp
+            destination_port_range: 
+              - 5985
+              - 5986
+            access: Allow
+            priority: 1003
+            direction: Inbound
+
+    - name: Create a network interface
+      azure_rm_networkinterface:
+        name: "{{ virtualmachine }}NIC"
+        resource_group: "{{ resourcegroup }}"
+        virtual_network: Sakthi-vnet
+        subnet_name: subnet01
+        security_group: "{{ virtualmachine }}NSG"
+        state: present
+        ip_configurations:
+          - name: default
+            public_ip_address_name: "{{ virtualmachine }}PIP"
+            primary: True
+
+
+    - name: Create a VM with managed disk
+      azure_rm_virtualmachine:
+         resource_group: "{{ resourcegroup }}"
+         name: "{{ virtualmachine }}"
+         vm_size: Standard_B1ms
+         managed_disk_type: Premium_LRS
+         admin_username: chs_admin
+         admin_password: "{{ password }}"
+         network_interfaces: "{{ virtualmachine }}NIC"
+         os_type: Windows
+         subnet_name: subnet01
+         image:
+           offer: WindowsServer
+           publisher: MicrosoftWindowsServer
+           sku: 2016-Datacenter
+           version: latest
+        
